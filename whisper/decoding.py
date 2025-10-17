@@ -597,9 +597,8 @@ class DecodingTask:
         return options
 
     def _get_initial_tokens(self) -> Tuple[int]:
-        # EDIT 3 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        
         tokens = list(self.sot_sequence)
-        print(f"Prefix tokens: {prefix_tokens}")
 
         if prefix := self.options.prefix:
             prefix_tokens = (
@@ -611,7 +610,8 @@ class DecodingTask:
                 max_prefix_len = self.n_ctx // 2 - self.sample_len
                 prefix_tokens = prefix_tokens[-max_prefix_len:]
             tokens = tokens + prefix_tokens
-
+        # EDIT 3 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print(f"Prefix tokens: {prefix_tokens}")
         if prompt := self.options.prompt:
             prompt_tokens = (
                 self.tokenizer.encode(" " + prompt.strip())
@@ -860,4 +860,3 @@ def decode(
     result = DecodingTask(model, options).run(mel)
 
     return result[0] if single else result
-
