@@ -569,7 +569,19 @@ class DecodingTask:
                 )
             )
 
+        # EDIT 1 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print(f"Model dims: {model.dims}")
+        print(f"Decoding options: {self.options}")
+        print(f"Beam size / Best of: {self.n_group}")
+        print(f"SOT sequence: {self.sot_sequence}")
+        print(f"Initial tokens: {self.initial_tokens}")
+        print(f"Decoder type: {type(self.decoder).__name__}")
+        print(f"Applied logit filters: {[type(f).__name__ for f in self.logit_filters]}")
+
+
     def _verify_options(self, options: DecodingOptions) -> DecodingOptions:
+        # EDIT 2 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print("Verifying decoding options...")
         if options.beam_size is not None and options.best_of is not None:
             raise ValueError("beam_size and best_of can't be given together")
         if options.temperature == 0:
@@ -585,7 +597,9 @@ class DecodingTask:
         return options
 
     def _get_initial_tokens(self) -> Tuple[int]:
+        # EDIT 3 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
         tokens = list(self.sot_sequence)
+        print(f"Prefix tokens: {prefix_tokens}")
 
         if prefix := self.options.prefix:
             prefix_tokens = (
@@ -609,7 +623,9 @@ class DecodingTask:
                 + prompt_tokens[-(self.n_ctx // 2 - 1) :]
                 + tokens
             )
-
+        # EDIT 4 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print(f"Prompt tokens: {prompt_tokens}")
+        print(f"Initial token sequence: {tokens}")
         return tuple(tokens)
 
     def _get_suppress_tokens(self) -> Tuple[int]:
@@ -638,10 +654,16 @@ class DecodingTask:
         if self.tokenizer.no_speech is not None:
             # no-speech probability is collected separately
             suppress_tokens.append(self.tokenizer.no_speech)
-
+        
+        # EDIT 5 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print(f"Suppress tokens: {suppress_tokens}")
         return tuple(sorted(set(suppress_tokens)))
 
     def _get_audio_features(self, mel: Tensor):
+
+        # EDIT 6 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print(f"Input mel shape: {mel.shape}, dtype: {mel.dtype}")
+
         if self.options.fp16:
             mel = mel.half()
 
@@ -660,6 +682,7 @@ class DecodingTask:
             return TypeError(
                 f"audio_features has an incorrect dtype: {audio_features.dtype}"
             )
+        print(f"Audio features shape: {audio_features.shape}, dtype: {audio_features.dtype}")
 
         return audio_features
 
@@ -674,7 +697,12 @@ class DecodingTask:
             languages = [max(probs, key=probs.get) for probs in lang_probs]
             if self.options.language is None:
                 tokens[:, self.sot_index + 1] = lang_tokens  # write language tokens
-
+        
+        # EDIT 7 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print(f"Detected languages: {languages}")
+        if lang_probs is not None:
+            print(f"Language probabilities: {lang_probs}")
+        print(f"Tokens after language detection: {tokens}")
         return languages, lang_probs
 
     def _main_loop(self, audio_features: Tensor, tokens: Tensor):
@@ -771,7 +799,15 @@ class DecodingTask:
         )
         if len(set(map(len, fields))) != 1:
             raise RuntimeError(f"inconsistent result lengths: {list(map(len, fields))}")
+        
+        # EDIT 8 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print(f"Audio features shape: {audio_features.shape}")
+        print(f"Tokens reshaped: {tokens.shape}")
+        print(f"Sum logprobs: {sum_logprobs}")
+        for idx, t in enumerate(texts):
+            print(f"Decoded text [{idx}]: {t}")
 
+        print(f"Result lengths: {[len(f) for f in fields]}")
         return [
             DecodingResult(
                 audio_features=features,
@@ -824,3 +860,4 @@ def decode(
     result = DecodingTask(model, options).run(mel)
 
     return result[0] if single else result
+
