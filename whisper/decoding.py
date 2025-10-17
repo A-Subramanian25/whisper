@@ -610,8 +610,7 @@ class DecodingTask:
                 max_prefix_len = self.n_ctx // 2 - self.sample_len
                 prefix_tokens = prefix_tokens[-max_prefix_len:]
             tokens = tokens + prefix_tokens
-        # EDIT 3 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
-        print(f"Prefix tokens: {prefix_tokens}")
+        
         if prompt := self.options.prompt:
             prompt_tokens = (
                 self.tokenizer.encode(" " + prompt.strip())
@@ -623,6 +622,8 @@ class DecodingTask:
                 + prompt_tokens[-(self.n_ctx // 2 - 1) :]
                 + tokens
             )
+        # EDIT 3 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
+        print(f"Prefix tokens: {prefix_tokens}")
         # EDIT 4 : THIS IS THE FIRST EDIT FOR PRINTING INTERMEDIATE RESULTS
         print(f"Prompt tokens: {prompt_tokens}")
         print(f"Initial token sequence: {tokens}")
